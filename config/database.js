@@ -1,10 +1,27 @@
 const { Sequelize } = require("sequelize");
 
-const sequelize = new Sequelize({
-  dialect: "sqlite",
-  storage: "./database.sqlite",
-  logging: false,
-  dialectModule: require("better-sqlite3"),
-});
+let sequelize;
+
+if (process.env.DATABASE_URL) {
+  // ✅ Render / Production (PostgreSQL)
+  sequelize = new Sequelize(process.env.DATABASE_URL, {
+    dialect: "postgres",
+    protocol: "postgres",
+    logging: false,
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false,
+      },
+    },
+  });
+} else {
+  // ✅ Local Development (SQLite)
+  sequelize = new Sequelize({
+    dialect: "sqlite",
+    storage: "database.sqlite",
+    logging: false,
+  });
+}
 
 module.exports = sequelize;

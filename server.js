@@ -47,6 +47,27 @@ const PORT = process.env.PORT || 5000;
 (async () => {
   try {
     await sequelize.sync();
+    const bcrypt = require("bcryptjs");
+const Admin = require("./models/Admin");
+
+sequelize.sync().then(async () => {
+  console.log("SQLite database synced");
+
+  const adminExists = await Admin.findOne({
+    where: { username: process.env.ADMIN_USERNAME },
+  });
+
+  if (!adminExists) {
+    const hash = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
+    await Admin.create({
+      username: process.env.ADMIN_USERNAME,
+      password: hash,
+    });
+    console.log("✅ Admin seeded");
+  }
+});
+
+
     console.log("SQLite database synced");
 
     app.listen(PORT, () => {
